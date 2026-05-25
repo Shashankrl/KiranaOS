@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KiranaOS — Advanced Retail Operating System</title>
+  <meta name="description" content="High performance retail operating system for local and grocery stores featuring robust offline-first sync pipelines and intelligent billing.">
+  
+  <!-- Premium Outfit & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Feather Icons pack -->
+  <script src="https://unpkg.com/feather-icons"></script>
+  
+  <!-- Custom Design stylesheet -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- Top Utility Bar (Inspired by mvjce.edu.in quick links header) -->
+  <div class="top-bar">
+    <div class="top-bar-links">
+      <span class="active-terminal-badge"><i data-feather="radio" style="width: 0.8rem;"></i> Local Sync Active</span>
+      <span style="opacity: 0.5;">|</span>
+      <span>Aashirvaad General Store</span>
+    </div>
+    <div class="top-bar-links">
+      <a href="#" class="top-bar-link"><i data-feather="help-circle" style="width: 0.8rem;"></i> Help Desk</a>
+      <a href="#" class="top-bar-link"><i data-feather="settings" style="width: 0.8rem;"></i> Platform Config</a>
+    </div>
+  </div>
+
+  <!-- Main Corporate Navigation Header (MVJCE Style Branding) -->
+  <header class="main-header">
+    <div class="logo-block">
+      <div class="logo-shield">K</div>
+      <div class="brand-details">
+        <h1>Kirana<span>OS</span></h1>
+        <p>Offline-First Retail Management Architecture</p>
+      </div>
+    </div>
+    
+    <nav class="navbar">
+      <a class="nav-item active" data-target="pos">
+        <i data-feather="shopping-cart" style="width: 1rem;"></i> POS Terminal
+      </a>
+      <a class="nav-item" data-target="inventory">
+        <i data-feather="package" style="width: 1rem;"></i> Inventory Manager
+      </a>
+      <a class="nav-item" data-target="orders">
+        <i data-feather="truck" style="width: 1rem;"></i> Wholesale Orders
+      </a>
+      <a class="nav-item" data-target="analytics">
+        <i data-feather="bar-chart-2" style="width: 1rem;"></i> Analytics
+      </a>
+    </nav>
+  </header>
+
+  <!-- Scrolling Notice/Announcement Bar -->
+  <div class="announcement-bar">
+    <span class="announcement-title">Alert Ticker</span>
+    <div class="announcement-marquee">
+      Background Sync Manager is ONLINE &bull; 8 local products loaded from Room SQLite Database &bull; Delta sync queue cleared &bull; Warning: 2 items currently running LOW STOCK &bull; Last checkout synchronised successfully in 120ms via API Gateway.
+    </div>
+  </div>
+
+  <!-- Core Layout Structure -->
+  <main class="main-container">
+    
+    <!-- Workspace Area (Left Panel) -->
+    <div class="workspace-panel">
+      
+      <!-- 1. POS Terminal Workspace -->
+      <div id="workspace-pos" class="workspace-panel" style="display: flex; flex-direction: column; gap: 1.5rem; width: 100%;">
+        
+        <!-- Live Analytics Stats Metrics -->
+        <div class="stats-grid">
+          <div class="stat-card" style="--stat-color: var(--color-info)">
+            <div class="stat-icon-wrapper"><i data-feather="trending-up"></i></div>
+            <div class="stat-text">
+              <h4>Today's Sales</h4>
+              <div class="stat-val" id="metrics-sales-sum">₹15,820</div>
+            </div>
+          </div>
+          <div class="stat-card" style="--stat-color: var(--color-success)">
+            <div class="stat-icon-wrapper"><i data-feather="package"></i></div>
+            <div class="stat-text">
+              <h4>Total Stock Quantity</h4>
+              <div class="stat-val" id="metrics-stock-sum">0</div>
+            </div>
+          </div>
+          <div class="stat-card" style="--stat-color: var(--color-danger)">
+            <div class="stat-icon-wrapper"><i data-feather="alert-triangle"></i></div>
+            <div class="stat-text">
+              <h4>Low Stock Alerts</h4>
+              <div class="stat-val" id="metrics-lowstock-sum" style="color: var(--color-danger)">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- POS Workspace Details layout -->
+        <div class="pos-layout">
+          
+          <!-- Catalog List -->
+          <div class="pos-catalog-wrapper">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+              <h3 style="font-size: 1rem; font-weight: 700; color: var(--color-primary);">Quick Catalog Catalog</h3>
+              <input type="text" class="search-field" style="max-width: 240px; padding: 0.45rem 0.75rem;" placeholder="Search catalog..." oninput="handleSearchPOS(this.value)">
+            </div>
+            
+            <div class="pos-catalog-grid" id="pos-catalog-grid">
+              <!-- Grid items loaded dynamically -->
+            </div>
+          </div>
+          
+          <!-- POS Cart Pane -->
+          <div class="pos-cart-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 0.25rem;">
+              <h3 style="font-size: 1rem; font-weight: 700; color: var(--color-primary);">Cart Checkout</h3>
+              <button onclick="clearPOSCart()" style="background: none; border: none; color: var(--color-danger); cursor: pointer; display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 700; font-family: var(--font-sans);">
+                <i data-feather="trash-2" style="width: 0.9rem; height: 0.9rem;"></i> Clear
+              </button>
+            </div>
+            
+            <div class="cart-items-container" id="pos-cart-list">
+              <!-- Cart slots loaded dynamically -->
+            </div>
+            
+            <div class="cart-totals-block">
+              <div class="cart-total-row"><span>Subtotal</span> <span id="sum-subtotal">₹0</span></div>
+              <div class="cart-total-row"><span>GST Tax (18% Local)</span> <span id="sum-tax">₹0</span></div>
+              <div class="cart-total-row" style="color: var(--color-success)"><span>Discount Applied</span> <span id="sum-discount">₹0</span></div>
+              <div class="cart-total-row grand"><span>Grand Total</span> <span id="sum-total">₹0</span></div>
+            </div>
+            
+            <button class="btn-checkout" onclick="checkoutCartItems()">
+              <i data-feather="printer" style="width: 1.1rem;"></i> Complete Sale & Print
+            </button>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- 2. Inventory Manager Workspace -->
+      <div id="workspace-inventory" class="workspace-panel" style="display: none; flex-direction: column; gap: 1.5rem; width: 100%;">
+        <div class="panel-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h3 class="panel-card-title"><i data-feather="package" style="width: 1.2rem;"></i> Stock Inventory Manager</h3>
+            
+            <div class="category-tabs-group">
+              <button class="category-badge-btn active" onclick="filterInventoryCategory('all', this)">All Category</button>
+              <button class="category-badge-btn" onclick="filterInventoryCategory('grocery', this)">Grocery</button>
+              <button class="category-badge-btn" onclick="filterInventoryCategory('dairy', this)">Dairy</button>
+              <button class="category-badge-btn" onclick="filterInventoryCategory('beverages', this)">Beverages</button>
+              <button class="category-badge-btn" onclick="filterInventoryCategory('snacks', this)">Snacks</button>
+            </div>
+          </div>
+          
+          <div class="search-controls">
+            <input type="text" class="search-field" placeholder="Search inventory rows..." oninput="handleSearchInventory(this.value)">
+          </div>
+          
+          <div style="overflow-x: auto; width: 100%;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Sale Price</th>
+                  <th>Available Stock</th>
+                  <th>Inventory Status</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-rows">
+                <!-- Inventory slots loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Wholesale Orders Draft Workspace -->
+      <div id="workspace-orders" class="workspace-panel" style="display: none; flex-direction: column; gap: 1.5rem; width: 100%;">
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem;">
+          
+          <!-- Booking Form -->
+          <div class="panel-card">
+            <h3 class="panel-card-title"><i data-feather="plus-circle" style="width: 1.2rem;"></i> Book Wholesale Order</h3>
+            
+            <form onsubmit="submitWholesaleOrder(event)">
+              <div style="display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem;">
+                <label style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary);">Select Vendor</label>
+                <select id="order-distributor" class="search-field">
+                  <option value="Hindustan Unilever Ltd.">Hindustan Unilever Ltd.</option>
+                  <option value="Amul Dairy Co-operative">Amul Dairy Co-operative</option>
+                  <option value="Nestle India Ltd.">Nestle India Ltd.</option>
+                  <option value="Coca-Cola Bottling India">Coca-Cola Bottling India</option>
+                </select>
+              </div>
+              
+              <div style="display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem;">
+                <label style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary);">Target Wholesale Item</label>
+                <select id="order-product" class="search-field">
+                  <option value="Aashirvaad Shudh Chakki Atta 5kg">Aashirvaad Shudh Chakki Atta 5kg</option>
+                  <option value="Fortune Soya Health Oil 1L">Fortune Soya Health Oil 1L</option>
+                  <option value="Amul Pasteurised Butter 100g">Amul Pasteurised Butter 100g</option>
+                  <option value="Thums Up Cola 750ml">Thums Up Cola 750ml</option>
+                  <option value="Maggi 2-Minute Masala Noodles">Maggi 2-Minute Masala Noodles</option>
+                </select>
+              </div>
+              
+              <div style="display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.5rem;">
+                <label style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary);">Cartons / Boxes Quantity</label>
+                <input type="number" id="order-qty" class="search-field" min="1" placeholder="Enter wholesale cartons quantity">
+              </div>
+              
+              <button class="btn-checkout" type="submit">
+                <i data-feather="plus" style="width: 1.1rem;"></i> Create Draft Wholesale Book
+              </button>
+            </form>
+          </div>
+          
+          <!-- Queue List -->
+          <div class="panel-card">
+            <h3 class="panel-card-title"><i data-feather="list" style="width: 1.2rem;"></i> Local Draft wholesale bookings</h3>
+            <div class="terminal-logs-box" id="wholesale-queue-list" style="background-color: var(--color-bg-light); color: var(--color-text-dark); border: 1px solid var(--color-border); height: 260px;">
+              <!-- Draft bookings printed dynamically -->
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- 4. Analytics Workspace -->
+      <div id="workspace-analytics" class="workspace-panel" style="display: none; flex-direction: column; gap: 1.5rem; width: 100%;">
+        <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.5rem;">
+          
+          <div class="panel-card">
+            <h3 class="panel-card-title"><i data-feather="trending-up" style="width: 1.2rem;"></i> Weekly Sales Revenue Trend</h3>
+            <div style="background-color: var(--color-bg-light); padding: 1rem; border-radius: 6px; border: 1px solid var(--color-border);" id="svg-chart-container">
+              <!-- SVG chart rendered dynamically -->
+            </div>
+          </div>
+          
+          <div class="panel-card">
+            <h3 class="panel-card-title"><i data-feather="activity" style="width: 1.2rem;"></i> Active Sync Statistics</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; font-size: 0.9rem;">
+                <span>Online Sync Status</span>
+                <span class="badge success">HEALTHY</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; font-size: 0.9rem;">
+                <span>Pending Sync Operations</span>
+                <span class="badge success">0</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; font-size: 0.9rem;">
+                <span>Average Sync Latency</span>
+                <span style="font-weight: 700;">120ms</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; font-size: 0.9rem;">
+                <span>Redis Eviction Rate</span>
+                <span style="font-weight: 700;">0.05/sec</span>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+    </div>
+
+    <!-- System Flow Telemetry (Right Panel Sidebar - Offline Architecture Monitor) -->
+    <aside class="sidebar-terminal">
+      <h3 class="panel-card-title" style="border-bottom: 2px solid var(--color-primary); color: var(--color-primary);">
+        <i data-feather="activity" style="width: 1.2rem;"></i> Workflow Telemetry
+      </h3>
+      <p style="font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.4;">Displays real-time logs illustrating how client user actions trigger local storage Room SQLite edits, background sync managers, gateway authentication, Kafka topic streams, and PostgreSQL updates.</p>
+      
+      <div class="terminal-logs-box" id="terminal-logs">
+        <!-- Telemetry Logs populated dynamically -->
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Printable Receipt Modal Overlay sheet -->
+  <div class="modal-wrapper" id="bill-modal-overlay">
+    <div class="bill-sheet">
+      <div class="bill-header">
+        <h3>KiranaOS Checkout</h3>
+        <p>Aashirvaad General Store</p>
+        <p style="font-size: 0.7rem; color: var(--color-text-muted);" id="bill-date"></p>
+      </div>
+      
+      <div class="bill-rows" id="bill-rows-list">
+        <!-- Populated dynamically -->
+      </div>
+      
+      <div class="bill-totals-area">
+        <div class="bill-line"><span>Subtotal</span> <span id="bill-subtotal">₹0</span></div>
+        <div class="bill-line"><span>GST Tax (18%)</span> <span id="bill-tax">₹0</span></div>
+        <div class="bill-line" style="color: var(--color-success)"><span>Discount Applied</span> <span id="bill-discount">₹0</span></div>
+        <div class="bill-line" style="font-weight: 700; border-top: 1px dashed #777; padding-top: 0.25rem;"><span>Grand Total</span> <span id="bill-total">₹0</span></div>
+      </div>
+      
+      <div style="text-align: center; font-size: 0.7rem; color: var(--color-text-muted); margin: 0.5rem 0;">
+        Thank you for shopping! Powered by KiranaOS offline-first sync pipelines.
+      </div>
+      
+      <button class="bill-btn-close" onclick="closeReceiptModal()">Close Terminal Window</button>
+    </div>
+  </div>
+
+  <!-- Copyright footer -->
+  <footer>
+    <p>&copy; 2026 KiranaOS Retail Systems. High contrast user dashboard portal inspired by professional designs.</p>
+  </footer>
+
+  <!-- Loader Script -->
+  <script src="app.js"></script>
+</body>
+</html>
